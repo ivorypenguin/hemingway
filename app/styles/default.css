@@ -164,3 +164,8 @@ a:hover {
 	content: "\f060";
 }
 
+.del {
+	color: #da475a;
+	text-decoration: line-through;
+}
+
