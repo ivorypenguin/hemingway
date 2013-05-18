@@ -169,3 +169,11 @@ a:hover {
 	text-decoration: line-through;
 }
 
+.ins {
+	color: #47da7e;
+	text-decoration: none;
+}
+
+#editor:focus {
+	outline: none;
+}
