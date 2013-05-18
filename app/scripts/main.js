@@ -47,9 +47,24 @@ require([
         IceHemingwayPlugin.prototype = {
 
             keyDown: function(e) {
-                console.log("do stuff");
+                var change = this._ice.getCurrentRange();
+                //var synergyData = {startOffset: change.startOffset, endOffset: change.endOffset, }
+                //console.log(change);
+                //console.log("Changed: " + change.startOffset + " to " + change.endOffset);
+                //console.log(JSON.stringify(synergyData));
                return true;
-            }
+            },
+            nodeInserted: function(node, range) {
+                console.log("inserted: ");
+                console.dir(node);
+                return true;
+            },
+            nodeCreated: function(node, options) {
+                console.log("created: ");
+                console.dir(node);
+                console.dir(options)
+                return true;
+            },
 
         };
 
