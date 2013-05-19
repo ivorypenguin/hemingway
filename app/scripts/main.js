@@ -188,4 +188,50 @@ require([
         }
     })();
     window.hemingway = hemingway;
+
+    var contextLoader = (function () {
+        var init,
+            getMessages,
+            messages,
+            getDoc;
+
+        getMessages = function (data) {
+            return messages;
+        }
+        getDoc = function (data) {
+           $.ajax({
+              dataType: "jsonp",
+              jsonp: 'callback',
+              url: "http://ivorypenguin.com/context/",
+              success: function (data) {
+                
+              }
+            }); 
+        } 
+
+        init = function (argument) {
+            $.ajax({
+              dataType: "jsonp",
+              jsonp: 'callback',
+              url: "http://ivorypenguin.com/context/",
+              success: function (data) {
+                messages = data;
+                _.each(data, function(msg) {
+                    $("#documents ul").append("<li>" + 
+                                              "<span><img src='"+ msg.person_info[msg.addresses.from.email].thumbnail +"'/></span>" +
+                                              "<span><a href='edit.html?id="+ msg.file_id + "'>" + msg.subject +"</a></span>" +
+                                              "<span>"+ msg.addresses.from.name +"</span>");
+                });
+              }
+            });
+        }
+
+        init();
+        
+        return {
+            getMessages: getMessages,
+            getDoc: getDoc
+        }
+    })();
+    window.contextLoader = contextLoader;
 });
