@@ -79,6 +79,7 @@ require([
     var hemingway = (function () {
         var init,
             tracker,
+            sendChatMessage,
             sendData,
             dataChannel,
             getCursorPos;
@@ -124,20 +125,29 @@ require([
 
             dataChannel.join('room');
             
+            dataChannel.in("room").on("action", function(data) {
+                console.log(data);
+            });
+            
             dataChannel.in("room").on("chat", function(data) {
                 console.log(data);
             });
         }
         
         sendData = function (data) {
+            dataChannel.in("room").emit("action", data);
+        };
+        
+        sendChatMessage = function (data) {
             dataChannel.in("room").emit("chat", data);
         };
 
         init();
         
         return {
-            send: sendData
+            send: sendData,
+            chat: sendChatMessage
         }
     })();
-        window.hemingway = hemingway;
+    window.hemingway = hemingway;
 });
