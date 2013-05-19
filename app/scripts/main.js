@@ -18,19 +18,22 @@ require.config({
         jquery: '../bower_components/jquery/jquery',
         backbone: '../bower_components/backbone-amd/backbone',
         underscore: '../bower_components/underscore-amd/underscore',
-        ice: './ice.min'
+        ice: './ice.min',
+        socket: 'http://ivorypenguin.com:9999/socket.io/socket.io',
+        datachannel: 'http://ivorypenguin.com:9999/datachannel.io/datachannel.io'
     }
 });
 
 require([
     'backbone',
-    'ice'
+    'ice',
+    'socket',
+    'datachannel'
 ], function (Backbone) {
     Backbone.history.start();
 
    // jQuery(function() {
         // hemingway.getCursorPos();
-        window.hemingway = hemingway;
         jQuery.browser = {
             version: 'p'
         };
@@ -76,6 +79,8 @@ require([
     var hemingway = (function () {
         var init,
             tracker,
+            sendData,
+            dataChannel,
             getCursorPos;
 
         getCursorPos = function (element) {
@@ -112,12 +117,27 @@ require([
             tracker.startTracking();
 
             window.tracker = tracker; 
+
+            dataChannel = new DataChannel({
+                socketServer: 'http://ivorypenguin.com:9999'
+            });
+
+            dataChannel.join('room');
+            
+            dataChannel.in("room").on("chat", function(data) {
+                console.log(data);
+            });
         }
         
+        sendData = function (data) {
+            dataChannel.in("room").emit("chat", data);
+        };
+
         init();
         
         return {
-            getCursorPos: getCursorPos
+            send: sendData
         }
-    })(); 
+    })();
+        window.hemingway = hemingway;
 });
