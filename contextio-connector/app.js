@@ -4,12 +4,18 @@
  */
 
 var express = require('express')
+  , ContextIO = require('contextio')
   , routes = require('./routes')
-  , user = require('./routes/user')
+  // , accounts = require('./routes/accounts')
   , http = require('http')
   , path = require('path');
 
 var app = express();
+
+var ctxioClient = new ContextIO.Client({
+    key: "i9haou5h",
+    secret: "N2iyXT8XAaYhpN82"
+  });
 
 // all environments
 app.set('port', process.env.PORT || 3000);
@@ -28,7 +34,7 @@ if ('development' == app.get('env')) {
 }
 
 app.get('/', routes.index);
-app.get('/users', user.list);
+// app.get('/accounts', accounts);
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
