@@ -48,29 +48,49 @@ require([
         };
 
         IceHemingwayPlugin.prototype = {
-
+            
             keyDown: function(e) {
-                var change = this._ice.getCurrentRange();
-                //var synergyData = {startOffset: change.startOffset, endOffset: change.endOffset, }
-                //console.log(change);
+                var range = this._ice.getCurrentRange();
+                var change = this._ice.getChange();
+                var textToSend = String.fromCharCode(e.which);
+                if (!e.shiftKey)  {
+                    textToSend = textToSend.toLowerCase();
+                }
+                var actionType = (e.keyCode == 8) ? 'delete' : 'insert';
+                var synergyData = {startOffset: range.startOffset, 
+                                   endOffset: range.endOffset, 
+                                   html: range.toHtml(), 
+                                   text: textToSend, 
+                                   parentId: range.startContainer.parentNode.id,
+                                   action: actionType
+                                   }
+                //console.log(this._ice.env);
+                //console.log(range.startContainer.parentNode.id);
+                //console.log("shift: " + e.shiftKey)
+                //console.log(JSON.stringify(range));
+                console.log(range);
+                hemingway.send(synergyData);
                 //console.log("Changed: " + change.startOffset + " to " + change.endOffset);
                 //console.log(JSON.stringify(synergyData));
                return true;
             },
             nodeInserted: function(node, range) {
-                console.log("inserted: ");
-                console.dir(node);
+                //console.log("inserted: ");
+                //console.dir(node);
+                //console.log(range);
+                //var data = {"text": node.textContent, "action": "ins"}
+                //hemingway.send(data);
                 return true;
             },
             nodeCreated: function(node, options) {
-                console.log("created: ");
-                console.dir(node);
-                console.dir(options)
+                //console.log("created: ");
+                //console.dir(node);
+                //console.dir(options);
+                //hemingway.send({'element': node, 'settings': options});
                 return true;
-            },
+            }
 
         };
-
         ice.dom.noInclusionInherits(IceHemingwayPlugin, ice.IcePlugin);
         exports._plugin.IceHemingwayPlugin = IceHemingwayPlugin;
 
@@ -112,7 +132,7 @@ require([
                 handleEvents: true,
                 // set a user object to associate with each change
                 currentUser: { id: 1, name: 'Tutor' },
-                plugins: ['IceEmdashPlugin', 'IceHemingwayPlugin']
+                plugins: ['IceEmdashPlugin', 'IceCopyPastePlugin', 'IceHemingwayPlugin']
             });
             // setup and start event handling for track changes
             tracker.startTracking();
@@ -126,7 +146,24 @@ require([
             dataChannel.join('room');
             
             dataChannel.in("room").on("action", function(data) {
-                console.log(data);
+                //tracker.insert(data.text);
+                // ice._plugin.IceHemingwayPlugin.prototype.boom(data)
+                // var range = document.createRange(document.getElementById('editor'), data.startOffset);
+                // var range = document.createRange(document.getElementById(data.parentId), data.startOffset);
+                // range.setEnd(data.endOffset);
+                var range = tracker.selection.getRangeAt(data.startOffset);
+
+                console.log("offsets: " + data.startOffset + ", " + data.endOffset);
+                console.log(range);
+                range.setStart(range.startContainer, data.startOffset);
+                range.setEnd(range.endContainer, data.endOffset);
+                range.collapse(true);
+                console.log(range);
+                if (data.action === 'delete') {
+                    tracker.deleteContents(true, range);
+                } else {
+                    tracker.insert(document.createTextNode(data.text), range );
+                }
             });
             
             dataChannel.in("room").on("chat", function(data) {
@@ -146,7 +183,8 @@ require([
         
         return {
             send: sendData,
-            chat: sendChatMessage
+            chat: sendChatMessage,
+            getCursorPos: getCursorPos
         }
     })();
     window.hemingway = hemingway;
